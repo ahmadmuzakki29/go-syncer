@@ -1,7 +1,6 @@
 package syncer
 
 import (
-	"net/http"
 	"sync"
 )
 
@@ -36,26 +35,4 @@ func unlock(id string) {
 		lock.buffer -= 1
 		syncer[id] = lock
 	}
-}
-
-func HandlerLock(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	id := r.FormValue("id")
-	if id == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	lock(id)
-	w.WriteHeader(http.StatusOK)
-}
-
-func HandlerUnlock(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	id := r.FormValue("id")
-	if id == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	unlock(id)
-	w.WriteHeader(http.StatusOK)
 }

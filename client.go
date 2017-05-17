@@ -1,48 +1,54 @@
 package syncer
 
 import (
-	"fmt"
-	"io/ioutil"
-	"net/http"
+	"context"
+	"errors"
+	"github.com/ahmadmuzakki29/go-syncer/pb"
+	"google.golang.org/grpc"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
-type Config struct {
-	EndPoint string
-}
+var client pb.SyncerClient
 
-var config Config
-
-func Init(cfg Config) {
-	config = cfg
-}
-
-func Lock(id string) error {
-	r, err := http.NewRequest("GET", config.EndPoint+"/lock?id="+id, nil)
+func Init(address string) error {
+	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
 
-	resp, err := http.DefaultClient.Do(r)
-	if err != nil {
-		return err
-	}
+	client = pb.NewSyncerClient(conn)
 
-	_, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Failed to lock status : %d", resp.StatusCode)
-	}
+	go func(conn *grpc.ClientConn) {
+		ch := make(chan os.Signal)
+		signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
+		<-ch
+		conn.Close()
+		os.Exit(1)
+	}(conn)
 
 	return nil
 }
 
-func Unlock(id string) {
-	req, err := http.NewRequest("GET", config.EndPoint+"/unlock?id="+id, nil)
+func Lock(id string) error {
+	reply, err := client.Lock(context.Background(), &pb.LockRequest{Id: id})
 	if err != nil {
-		return
+		return err
 	}
-	http.DefaultClient.Do(req)
+	if reply.Message != "OK" {
+		return errors.New(reply.Message)
+	}
+	return nil
+}
+
+func Unlock(id string) error {
+	reply, err := client.Unlock(context.Background(), &pb.LockRequest{Id: id})
+	if err != nil {
+		return err
+	}
+	if reply.Message != "OK" {
+		return errors.New(reply.Message)
+	}
+	return nil
 }

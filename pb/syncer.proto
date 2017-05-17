@@ -1,0 +1,17 @@
+
+syntax = "proto3";
+
+package pb;
+
+service Syncer {
+    rpc Lock (LockRequest) returns (Reply){}
+    rpc Unlock (LockRequest) returns (Reply){}
+}
+
+message LockRequest {
+    string id = 1;
+}
+
+message Reply {
+    string message = 1;
+}
