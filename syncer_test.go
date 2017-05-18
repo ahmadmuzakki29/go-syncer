@@ -11,7 +11,7 @@ import (
 
 // run this test after the server running
 func TestSyncer(t *testing.T) {
-	// we have 4 process with the same ID
+	// we have process with the same ID
 	id := "sameid"
 	address := fmt.Sprint("localhost", syncer.PORT)
 	syncer.Init(address)
