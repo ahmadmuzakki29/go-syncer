@@ -20,6 +20,8 @@ func main() {
 	}
 }
 
+// try to curl http://localhost:9000/payment?payment_id=123
+// in multiple terminal in same time
 func HandlePayment(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	payment_id := r.FormValue("payment_id")

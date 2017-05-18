@@ -1,10 +1,11 @@
 package syncer
 
 import (
+	"github.com/orcaman/concurrent-map"
 	"sync"
 )
 
-var syncer = make(map[string]Syncer)
+var syncer = cmap.New() //make(map[string]Syncer)
 
 type Syncer struct {
 	m      *sync.Mutex
@@ -12,27 +13,34 @@ type Syncer struct {
 }
 
 func lock(id string) {
-	if lock, ok := syncer[id]; ok {
+	if tmp, ok := syncer.Get(id); ok {
+		lock := tmp.(Syncer)
 		lock.buffer += 1
-		syncer[id] = lock
+		syncer.Set(id, lock)
 		lock.m.Lock()
 	} else {
-		syncer[id] = Syncer{
+		syncer.Set(id, Syncer{
 			m:      &sync.Mutex{},
 			buffer: 1,
-		}
-		syncer[id].m.Lock()
+		})
+
+		l, _ := syncer.Get(id)
+		l.(Syncer).m.Lock()
 	}
 }
 
 func unlock(id string) {
-	if lock, ok := syncer[id]; ok {
-		if lock.buffer == 1 {
-			delete(syncer, id)
-		}
+	if tmp, ok := syncer.Get(id); ok {
+		lock := tmp.(Syncer)
 
 		lock.m.Unlock()
 		lock.buffer -= 1
-		syncer[id] = lock
+
+		if lock.buffer == 1 {
+			syncer.Remove(id)
+			return
+		}
+
+		syncer.Set(id, lock)
 	}
 }

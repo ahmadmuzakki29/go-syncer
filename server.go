@@ -12,11 +12,11 @@ import (
 )
 
 const (
-	port = ":50051"
+	PORT = ":50051"
 )
 
 func Serve() {
-	lis, err := net.Listen("tcp", port)
+	lis, err := net.Listen("tcp", PORT)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -24,7 +24,7 @@ func Serve() {
 	pb.RegisterSyncerServer(s, &server{})
 
 	reflection.Register(s)
-	fmt.Println("serving on", port)
+	fmt.Println("serving on", PORT)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
