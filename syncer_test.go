@@ -13,7 +13,7 @@ import (
 func TestSyncer(t *testing.T) {
 	// we have process with the same ID
 	id := "sameid"
-	address := fmt.Sprint("localhost", syncer.PORT)
+	address := fmt.Sprint("localhost:9999")
 	syncer.Init(address)
 
 	processCount := 20
