@@ -40,7 +40,7 @@ func unlock(id string) {
 		lock.buffer -= 1
 
 		debugger("releasing "+id, lock.buffer)
-		if lock.buffer == 1 {
+		if lock.buffer == 0 {
 			syncer.Remove(id)
 			return
 		}
