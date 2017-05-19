@@ -1,6 +1,7 @@
 package syncer
 
 import (
+	"fmt"
 	"github.com/orcaman/concurrent-map"
 	"sync"
 )
@@ -17,6 +18,7 @@ func lock(id string) {
 		lock := tmp.(Syncer)
 		lock.buffer += 1
 		syncer.Set(id, lock)
+		debugger("suspending "+id, lock.buffer)
 		lock.m.Lock()
 	} else {
 		syncer.Set(id, Syncer{
@@ -24,6 +26,7 @@ func lock(id string) {
 			buffer: 1,
 		})
 
+		debugger("locking "+id, 1)
 		l, _ := syncer.Get(id)
 		l.(Syncer).m.Lock()
 	}
@@ -36,6 +39,7 @@ func unlock(id string) {
 		lock.m.Unlock()
 		lock.buffer -= 1
 
+		debugger("releasing "+id, lock.buffer)
 		if lock.buffer == 1 {
 			syncer.Remove(id)
 			return
@@ -43,4 +47,14 @@ func unlock(id string) {
 
 		syncer.Set(id, lock)
 	}
+}
+
+var DebugFlag bool
+
+func debugger(msg string, buffer int) {
+	if !DebugFlag {
+		return
+	}
+
+	fmt.Println(msg, " buffer:", buffer)
 }
