@@ -12,6 +12,10 @@ import (
 )
 
 func Serve(port string) {
+	if DebugFlag {
+		fmt.Println("--Debug Mode--")
+	}
+
 	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
