@@ -8,18 +8,26 @@ To install the library, run:
 `go get -u github.com/ahmadmuzakki29/go-syncer`
 
 Build the server binary :
-`cd $GOPATH/src/github.com/ahmadmuzakki29/go-syncer`
-`go get -u`
-`go build server/syncer.go`
+```
+cd $GOPATH/src/github.com/ahmadmuzakki29/go-syncer
+go get -u
+go build server/syncer.go
+```
 
 Run the server :
+
 `./syncer [options]`
-options : 
+
+options :
+ 
 --debug : Init debug mode
+
 --port <port> : Specify port for the service. default is 9999
 
 
-The following is a simple example which show how to implement it as a client. We gonna create dummy http server which will process an ID -- in this example is `payment_id`. After our http server is listening we gonna hit the API twice at the same time to simulate multiple process in different machines . Even though the http service is executed in single machine but we can assure you that the locking mechanism will do well in real multi machines because it use http2 transport to communicate with the **go-syncer** server.
+
+The following is a simple example which show how to implement it as a client. We gonna create dummy http server which will process an ID - in this example is `payment_id`. After our http server is listening we gonna hit the API twice at the same time to simulate multiple process in different machines . 
+Even though the http service is executed in single machine but we can assure you that the locking mechanism will do well in real multi machines because it use http2 transport to communicate with the **go-syncer** server.
 ```go
 package main
 
