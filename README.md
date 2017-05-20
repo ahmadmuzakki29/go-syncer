@@ -23,7 +23,7 @@ options :
  
 --debug : Init debug mode
 
---port < port > : Specify port for the service. default is 9999
+--port &lt;port&gt; : Specify port for the service. default is 9999
 
 
 
