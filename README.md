@@ -5,6 +5,7 @@ Go-syncer consists of server and client. The server must live before any client 
 
 # Getting started
 To install the library, run:
+
 `go get -u github.com/ahmadmuzakki29/go-syncer`
 
 Build the server binary :
@@ -22,7 +23,7 @@ options :
  
 --debug : Init debug mode
 
---port <port> : Specify port for the service. default is 9999
+--port < port > : Specify port for the service. default is 9999
 
 
 
