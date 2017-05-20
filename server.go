@@ -24,7 +24,7 @@ func Serve(port string) {
 	pb.RegisterSyncerServer(s, &server{})
 
 	reflection.Register(s)
-	fmt.Println("serving on", port)
+	fmt.Println("serving on :", port)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
