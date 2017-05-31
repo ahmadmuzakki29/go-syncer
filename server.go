@@ -32,7 +32,7 @@ func Serve(cfg Config) {
 	pb.RegisterSyncerServer(s, &server{})
 
 	reflection.Register(s)
-	fmt.Println("serving on", cfg.Port)
+	fmt.Println("serving on :", cfg.Port)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
