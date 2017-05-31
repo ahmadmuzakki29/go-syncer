@@ -21,19 +21,19 @@ func TestSyncer(t *testing.T) {
 	res := make(chan string, processCount*2)
 	var i int
 	for i < processCount {
-		go func() {
+		go func(a int) {
 			syncer.Lock(id)
 			d := getRandomDuration()
-			res <- fmt.Sprint("start process ", i)
+			res <- fmt.Sprint("start process ", a)
 			// simulate random duration process
 			time.Sleep(time.Duration(d))
-			res <- fmt.Sprint("finish process ", i)
+			res <- fmt.Sprint("finish process ", a)
 			if i < 2 {
 				// deliberately not unlocking the first 2 process
 				return
 			}
 			syncer.Unlock(id)
-		}()
+		}(i)
 		i += 1
 	}
 
