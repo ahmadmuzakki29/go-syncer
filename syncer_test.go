@@ -24,12 +24,12 @@ func TestSyncer(t *testing.T) {
 		go func(a int) {
 			syncer.Lock(id)
 			d := getRandomDuration()
-			res <- fmt.Sprint("start process ", a)
+			res <- "start process"
 			// simulate random duration process
 			time.Sleep(time.Duration(d))
-			res <- fmt.Sprint("finish process ", a)
-			if i < 2 {
-				// deliberately not unlocking the first 2 process
+			res <- "finish process"
+			if i > 8 {
+				// deliberately not unlocking the last 2 process
 				return
 			}
 			syncer.Unlock(id)
@@ -42,10 +42,10 @@ func TestSyncer(t *testing.T) {
 	for i < processCount {
 		// this expect the result will be synchronous
 		msg = <-res
-		assert.Equal(t, fmt.Sprint("start process ", i), msg)
+		assert.Equal(t, "start process", msg)
 		fmt.Println(msg)
 		msg = <-res
-		assert.Equal(t, fmt.Sprint("finish process ", i), msg)
+		assert.Equal(t, "finish process", msg)
 		fmt.Println(msg)
 		i += 1
 	}
