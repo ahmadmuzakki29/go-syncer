@@ -16,20 +16,24 @@ func TestSyncer(t *testing.T) {
 	address := fmt.Sprint("localhost:9999")
 	syncer.Init(address)
 
-	processCount := 20
+	processCount := 10
 
 	res := make(chan string, processCount*2)
 	var i int
 	for i < processCount {
-		go func() {
+		go func(a int) {
 			syncer.Lock(id)
 			d := getRandomDuration()
 			res <- "start process"
 			// simulate random duration process
 			time.Sleep(time.Duration(d))
 			res <- "finish process"
+			if i > 8 {
+				// deliberately not unlocking the last 2 process
+				return
+			}
 			syncer.Unlock(id)
-		}()
+		}(i)
 		i += 1
 	}
 

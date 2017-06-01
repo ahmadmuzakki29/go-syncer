@@ -9,14 +9,22 @@ import (
 	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
+	"time"
 )
 
-func Serve(port string) {
+type Config struct {
+	Port    string
+	Timeout time.Duration
+}
+
+func Serve(cfg Config) {
 	if DebugFlag {
 		fmt.Println("--Debug Mode--")
 	}
 
-	lis, err := net.Listen("tcp", ":"+port)
+	TIMEOUT = cfg.Timeout
+
+	lis, err := net.Listen("tcp", ":"+cfg.Port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -24,7 +32,7 @@ func Serve(port string) {
 	pb.RegisterSyncerServer(s, &server{})
 
 	reflection.Register(s)
-	fmt.Println("serving on :", port)
+	fmt.Println("serving on :", cfg.Port)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
