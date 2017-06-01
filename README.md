@@ -79,7 +79,7 @@ Then in terminal execute this `curl http://localhost:9000/payment?payment_id=123
 If you run **go-syncer** server with `-log-level info` you'd see `suspending 123  buffer: 2`. It means that **go-syncer** hold the incoming `123` request and process count at the moment is 2 processes.
 
 
-##Thanks to
+## Thanks to
 
 - github.com/orcaman/concurrent-map
 - google.golang.org/grpc
