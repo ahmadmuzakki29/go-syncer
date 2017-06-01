@@ -21,7 +21,7 @@ Run the server :
 
 options :
  
---debug : Init debug mode
+--log-level : Specify log level. option: info|warning|error
 
 --port &lt;port&gt; : Specify port for the service. default is 9999
 
@@ -74,4 +74,12 @@ func HandlePayment(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-Then in terminal execute this `curl http://localhost:9000/payment?payment_id=123 & curl http://localhost:9000/payment?payment_id=123`. That command will hit the API twice asynchronously if you run **go-syncer** server in debug mode you'd see `suspending 123  buffer: 2` it means that **go-syncer** hold the incoming `123` request and process count at the moment is 2 processes.
+Then in terminal execute this `curl http://localhost:9000/payment?payment_id=123 & curl http://localhost:9000/payment?payment_id=123`. That command will hit the API twice asynchronously
+ 
+If you run **go-syncer** server with `-log-level info` you'd see `suspending 123  buffer: 2`. It means that **go-syncer** hold the incoming `123` request and process count at the moment is 2 processes.
+
+
+##Thanks to
+
+- github.com/orcaman/concurrent-map
+- google.golang.org/grpc
