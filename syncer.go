@@ -24,7 +24,7 @@ func lock(id string) {
 		lock.buffer += 1
 
 		syncer.Set(id, lock)
-		debugger(fmt.Sprint("suspending "+id, " buffer:", lock.buffer))
+		logger(LOG_WARNING, fmt.Sprint("suspending "+id, " buffer:", lock.buffer))
 		lock.m.Lock()
 	} else {
 		ctx := context.Background()
@@ -40,7 +40,7 @@ func lock(id string) {
 		// which one first
 		unlocker(id, ctx.Done())
 
-		debugger(fmt.Sprint("locking "+id, " buffer:", 1))
+		logger(LOG_INFO, "locking "+id, " buffer:", 1)
 		l, _ := syncer.Get(id)
 		l.(Syncer).m.Lock()
 	}
@@ -53,7 +53,7 @@ func doUnlock(id string) {
 		lock.m.Unlock()
 		lock.buffer -= 1
 
-		debugger(fmt.Sprint("releasing "+id, " buffer:", lock.buffer))
+		logger(LOG_INFO, "releasing "+id, " buffer:", lock.buffer)
 		if lock.buffer == 0 {
 			syncer.Remove(id)
 			return
@@ -78,6 +78,11 @@ func unlock(id string) {
 
 func unlocker(id string, done <-chan struct{}) {
 	go func(id string, done <-chan struct{}) {
+		defer func() {
+			if r := recover(); r != nil {
+				logger(LOG_ERROR, r)
+			}
+		}()
 		<-done
 		doUnlock(id)
 	}(id, done)
