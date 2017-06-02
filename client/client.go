@@ -11,28 +11,32 @@ import (
 	"time"
 )
 
-var client pb.SyncerClient
+var pbClient pb.SyncerClient
 
 type Config struct {
 	EndPoint    string
 	LockTimeout time.Duration
 }
 
-var config *Config
+type client struct {
+	config *Config
+}
 
-func Init(cfg Config) error {
+func NewClient(cfg Config) (*client, error) {
 	conn, err := grpc.Dial(cfg.EndPoint, grpc.WithInsecure())
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if cfg.LockTimeout.Nanoseconds() == 0 {
 		// default lock timeout is 30s
 		cfg.LockTimeout = time.Duration(30) * time.Second
 	}
-	config = &cfg
+	cli := client{
+		&cfg,
+	}
 
-	client = pb.NewSyncerClient(conn)
+	pbClient = pb.NewSyncerClient(conn)
 
 	go func(conn *grpc.ClientConn) {
 		ch := make(chan os.Signal)
@@ -42,16 +46,17 @@ func Init(cfg Config) error {
 		os.Exit(1)
 	}(conn)
 
-	return nil
+	return &cli, nil
 }
 
-func Lock(id string) error {
+func (cli *client) Lock(id string) error {
+	config := cli.config
 	if config == nil {
 		return errors.New("Syncer Not initialized")
 	}
 
 	locktimeout := config.LockTimeout.String()
-	reply, err := client.Lock(context.Background(), &pb.LockRequest{Id: id, Locktimeout: locktimeout})
+	reply, err := pbClient.Lock(context.Background(), &pb.LockRequest{Id: id, Locktimeout: locktimeout})
 	if err != nil {
 		return err
 	}
@@ -61,12 +66,13 @@ func Lock(id string) error {
 	return nil
 }
 
-func Unlock(id string) error {
+func (cli *client) Unlock(id string) error {
+	config := cli.config
 	if config == nil {
 		return errors.New("Syncer Not initialized")
 	}
 
-	reply, err := client.Unlock(context.Background(), &pb.LockRequest{Id: id})
+	reply, err := pbClient.Unlock(context.Background(), &pb.LockRequest{Id: id})
 	if err != nil {
 		return err
 	}

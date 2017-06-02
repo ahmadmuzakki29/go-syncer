@@ -18,7 +18,11 @@ func TestSyncer(t *testing.T) {
 		EndPoint:    address,
 		LockTimeout: time.Duration(10) * time.Second,
 	}
-	client.Init(cfg)
+	cli, err := client.NewClient(cfg)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	processCount := 10
 
@@ -26,7 +30,7 @@ func TestSyncer(t *testing.T) {
 	var i int
 	for i < processCount {
 		go func(a int) {
-			client.Lock(id)
+			cli.Lock(id)
 			d := getRandomDuration()
 			res <- "start process"
 			// simulate random duration process
@@ -36,7 +40,7 @@ func TestSyncer(t *testing.T) {
 				// deliberately not unlocking the last 2 process
 				return
 			}
-			client.Unlock(id)
+			cli.Unlock(id)
 		}(i)
 		i += 1
 	}
