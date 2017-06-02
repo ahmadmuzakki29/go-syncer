@@ -3,26 +3,25 @@ package syncer
 import (
 	"errors"
 	"fmt"
+	"log"
+	"net"
+	"time"
+
 	"github.com/ahmadmuzakki29/go-syncer/pb"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"log"
-	"net"
-	"time"
 )
 
 type Config struct {
-	Port    string
-	Timeout time.Duration
+	Port     string
+	Timeout  time.Duration
+	LogLevel string
 }
 
 func Serve(cfg Config) {
-	if DebugFlag {
-		fmt.Println("--Debug Mode--")
-	}
-
 	TIMEOUT = cfg.Timeout
+	LogLevel = getLogLevel(cfg.LogLevel)
 
 	lis, err := net.Listen("tcp", ":"+cfg.Port)
 	if err != nil {
@@ -32,7 +31,8 @@ func Serve(cfg Config) {
 	pb.RegisterSyncerServer(s, &server{})
 
 	reflection.Register(s)
-	fmt.Println("serving on :", cfg.Port)
+	fmt.Println("serving on :" + cfg.Port)
+	fmt.Println("log level : " + cfg.LogLevel)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
