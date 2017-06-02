@@ -36,19 +36,33 @@ import (
 	"fmt"
 	"time"
 	"net/http"
-	"github.com/ahmadmuzakki29/go-syncer"
+
+	"github.com/ahmadmuzakki29/go-syncer/client"
+	"log"
 )
 
 const (
 	address = "localhost:9999"
 )
 
+var syncer *client.Client
+
 func main() {
-	syncer.Init(address)
-	http.HandleFunc("/payment", HandlePayment)
-	err := http.ListenAndServe(":9000", nil)
+	cfg := client.Config{
+		EndPoint:    address,
+		LockTimeout: time.Duration(10) * time.Second, // auto-unlock when timeout reach
+	}
+	
+	var err error
+	syncer,err = client.NewClient(cfg)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
+	}
+	
+	http.HandleFunc("/payment", HandlePayment)
+	err = http.ListenAndServe(":9000", nil)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
