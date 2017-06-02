@@ -2,7 +2,7 @@ package syncer_test
 
 import (
 	"fmt"
-	"github.com/ahmadmuzakki29/go-syncer"
+	"github.com/ahmadmuzakki29/go-syncer/client"
 	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"testing"
@@ -14,7 +14,15 @@ func TestSyncer(t *testing.T) {
 	// we have process with the same ID
 	id := "sameid"
 	address := fmt.Sprint("localhost:9999")
-	syncer.Init(address)
+	cfg := client.Config{
+		EndPoint:    address,
+		LockTimeout: time.Duration(10) * time.Second,
+	}
+	cli, err := client.NewClient(cfg)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	processCount := 10
 
@@ -22,17 +30,17 @@ func TestSyncer(t *testing.T) {
 	var i int
 	for i < processCount {
 		go func(a int) {
-			syncer.Lock(id)
+			cli.Lock(id)
 			d := getRandomDuration()
 			res <- "start process"
 			// simulate random duration process
 			time.Sleep(time.Duration(d))
 			res <- "finish process"
-			if i > 8 {
+			if i > 7 {
 				// deliberately not unlocking the last 2 process
 				return
 			}
-			syncer.Unlock(id)
+			cli.Unlock(id)
 		}(i)
 		i += 1
 	}

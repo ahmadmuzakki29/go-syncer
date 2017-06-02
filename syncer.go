@@ -3,12 +3,10 @@ package syncer
 import (
 	"context"
 	"fmt"
+	"github.com/ahmadmuzakki29/go-syncer/pb"
 	"github.com/orcaman/concurrent-map"
 	"sync"
-	"time"
 )
-
-var TIMEOUT time.Duration
 
 var syncer = cmap.New()
 
@@ -18,7 +16,10 @@ type Syncer struct {
 	done   context.CancelFunc
 }
 
-func lock(id string) {
+func lock(req *pb.LockRequest) {
+	id := req.Id
+	locktimeout := getLockTimeoutDuration(req.Locktimeout)
+
 	if tmp, ok := syncer.Get(id); ok {
 		lock := tmp.(Syncer)
 		lock.buffer += 1
@@ -28,7 +29,7 @@ func lock(id string) {
 		lock.m.Lock()
 	} else {
 		ctx := context.Background()
-		ctx, cancel := context.WithTimeout(ctx, TIMEOUT)
+		ctx, cancel := context.WithTimeout(ctx, locktimeout)
 
 		syncer.Set(id, Syncer{
 			m:      &sync.Mutex{},
@@ -38,7 +39,7 @@ func lock(id string) {
 
 		// will unlock when timeout comes or unlock() called
 		// which one first
-		unlocker(id, ctx.Done())
+		unlocker(req, ctx.Done())
 
 		logger(LOG_INFO, "locking "+id, " buffer:", 1)
 		l, _ := syncer.Get(id)
@@ -46,7 +47,10 @@ func lock(id string) {
 	}
 }
 
-func doUnlock(id string) {
+func doUnlock(req *pb.LockRequest) {
+	id := req.Id
+	locktimeout := getLockTimeoutDuration(req.Locktimeout)
+
 	if tmp, ok := syncer.Get(id); ok {
 		lock := tmp.(Syncer)
 
@@ -61,9 +65,9 @@ func doUnlock(id string) {
 
 		// refreshing the timeout
 		ctx := context.Background()
-		ctx, cancel := context.WithTimeout(ctx, TIMEOUT)
+		ctx, cancel := context.WithTimeout(ctx, locktimeout)
 		lock.done = cancel
-		unlocker(id, ctx.Done())
+		unlocker(req, ctx.Done())
 
 		syncer.Set(id, lock)
 	}
@@ -76,14 +80,14 @@ func unlock(id string) {
 	}
 }
 
-func unlocker(id string, done <-chan struct{}) {
-	go func(id string, done <-chan struct{}) {
+func unlocker(req *pb.LockRequest, done <-chan struct{}) {
+	go func(req *pb.LockRequest, done <-chan struct{}) {
 		defer func() {
 			if r := recover(); r != nil {
 				logger(LOG_ERROR, r)
 			}
 		}()
 		<-done
-		doUnlock(id)
-	}(id, done)
+		doUnlock(req)
+	}(req, done)
 }
