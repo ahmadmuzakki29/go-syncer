@@ -18,11 +18,11 @@ type Config struct {
 	LockTimeout time.Duration
 }
 
-type client struct {
+type Client struct {
 	config *Config
 }
 
-func NewClient(cfg Config) (*client, error) {
+func NewClient(cfg Config) (*Client, error) {
 	conn, err := grpc.Dial(cfg.EndPoint, grpc.WithInsecure())
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func NewClient(cfg Config) (*client, error) {
 		// default lock timeout is 30s
 		cfg.LockTimeout = time.Duration(30) * time.Second
 	}
-	cli := client{
+	cli := Client{
 		&cfg,
 	}
 
@@ -49,7 +49,7 @@ func NewClient(cfg Config) (*client, error) {
 	return &cli, nil
 }
 
-func (cli *client) Lock(id string) error {
+func (cli *Client) Lock(id string) error {
 	config := cli.config
 	if config == nil {
 		return errors.New("Syncer Not initialized")
@@ -66,7 +66,7 @@ func (cli *client) Lock(id string) error {
 	return nil
 }
 
-func (cli *client) Unlock(id string) error {
+func (cli *Client) Unlock(id string) error {
 	config := cli.config
 	if config == nil {
 		return errors.New("Syncer Not initialized")
