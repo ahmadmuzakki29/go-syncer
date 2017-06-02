@@ -1,3 +1,4 @@
+// to compile: protoc -I pb/ pb/syncer.proto --go_out=plugins=grpc:pb
 
 syntax = "proto3";
 
@@ -10,6 +11,7 @@ service Syncer {
 
 message LockRequest {
     string id = 1;
+    string locktimeout = 2;
 }
 
 message Reply {

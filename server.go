@@ -3,24 +3,20 @@ package syncer
 import (
 	"errors"
 	"fmt"
-	"log"
-	"net"
-	"time"
-
 	"github.com/ahmadmuzakki29/go-syncer/pb"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+	"log"
+	"net"
 )
 
 type Config struct {
 	Port     string
-	Timeout  time.Duration
 	LogLevel string
 }
 
 func Serve(cfg Config) {
-	TIMEOUT = cfg.Timeout
 	LogLevel = getLogLevel(cfg.LogLevel)
 
 	lis, err := net.Listen("tcp", ":"+cfg.Port)
@@ -45,7 +41,7 @@ func (s *server) Lock(ctx context.Context, req *pb.LockRequest) (*pb.Reply, erro
 	if id == "" {
 		return &pb.Reply{Message: "id must be specified"}, errors.New("id must be specified")
 	}
-	lock(id)
+	lock(req)
 	return &pb.Reply{Message: "OK"}, nil
 }
 

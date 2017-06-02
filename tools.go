@@ -1,8 +1,13 @@
 package syncer
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 var LogLevel int
+
+const DEFAULT_LOCK_TIMEOUT string = "30s"
 
 const (
 	LOG_INFO = iota
@@ -38,4 +43,13 @@ func getLogLevel(level string) int {
 	default:
 		return 2
 	}
+}
+
+func getLockTimeoutDuration(timeout string) time.Duration {
+	locktimeout, err := time.ParseDuration(timeout)
+	if err != nil {
+		logger(LOG_ERROR, err)
+		locktimeout, _ = time.ParseDuration(DEFAULT_LOCK_TIMEOUT)
+	}
+	return locktimeout
 }
